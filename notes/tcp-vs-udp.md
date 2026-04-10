@@ -16,8 +16,6 @@ UDP = fast (szybkie, ale bez gwarancji)
 - email
 - logowanie, banki
 
--
-
 ## ⚡ UDP (User Datagram Protocol)
 
 ✔ connectionless (bez połączenia)  
@@ -29,8 +27,6 @@ UDP = fast (szybkie, ale bez gwarancji)
 - gry online
 - VoIP (rozmowy)
 - streaming
-
--
 
 ## 🧠 Jak zapamiętać
 
